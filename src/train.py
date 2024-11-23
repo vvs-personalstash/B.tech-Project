@@ -34,12 +34,13 @@ def train_VGAE(features, adj_norm, adj_label, epochs, outdim):
            print("Epoch:", '%04d' % (epoch + 1), "train_loss=", "{:.5f}".format(loss.item()),"time=", "{:.5f}".format(time.time() - t))
 
     print("Optimization Finished!")
-
+    #torch.save(model.state_dict(),"../results/model/new1.pth")
     return model, hidden_emb
 
 
 def train_DSIPredictor(vgae_dict, features, adj, X_train, Y_train, epochs):
-
+    
+    print(1)
     pro1_index = list(X_train[:,0])
     pro2_index = list(X_train[:,1])
 
@@ -47,7 +48,7 @@ def train_DSIPredictor(vgae_dict, features, adj, X_train, Y_train, epochs):
 
     model = DSIPredictor(686, 1).to(device=try_gpu())
     model.gc1.weight.data = copy.deepcopy(vgae_dict['gc1.weight'])
-    model.gc2.weight.data = copy.deepcopy(vgae_dict['gc2.weight'])
+    #model.gc2.weight.data = copy.deepcopy(vgae_dict['gc2.weight'])
 
     loss_fcn = nn.BCELoss()
 
@@ -75,7 +76,8 @@ def train_DSIPredictor(vgae_dict, features, adj, X_train, Y_train, epochs):
         if epoch % 10 == 0:
             print("Epoch:", '%04d' % (epoch + 1), "train_loss=", "{:.5f}".format(loss.item()), "time=",
                   "{:.5f}".format(time.time() - t))
-
+    #model=finetune_DSIPredictor(model,features,adj,X_train,Y_train,20)
+    
     return model
 
 
@@ -126,7 +128,7 @@ def finetune_DSIPredictor(model, features, adj, X_train, Y_train, epochs):
         if epoch % 10 == 0:
             print("Epoch:", '%04d' % (epoch + 1), "train_loss=", "{:.5f}".format(loss.item()), "time=",
                   "{:.5f}".format(time.time() - t))
-
+    torch.save(model.state_dict(),"../results/model/new2.pth")
     return model
 
 

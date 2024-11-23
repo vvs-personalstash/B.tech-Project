@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 import pandas as pd
 import torch
 import torch.nn.functional as F
@@ -43,6 +44,7 @@ def evaluate_logits_all(Y_val, Y_pred_prob):
     Y_pred = np.array(Y_pred_prob) >= best_threshold
 
     confusion_mat = confusion_matrix(Y_val, Y_pred)
+    perf["Accuracy"] =  (confusion_mat[1, 1] + confusion_mat[0, 0])/(confusion_mat[1, 1] + confusion_mat[0, 1] + confusion_mat[1, 0] + confusion_mat[0, 0])
     perf["Sensitivity"] = confusion_mat[1, 1] / (confusion_mat[1, 1] + confusion_mat[1, 0])
     perf["Specificity"] = confusion_mat[0, 0] / (confusion_mat[0, 0] + confusion_mat[0, 1])
     perf["PPV"] = confusion_mat[1, 1] / (confusion_mat[1, 1] + confusion_mat[0, 1])
@@ -147,3 +149,5 @@ def youden_index(preds, labels):
             sp_spec = sp
             threshold_spec = threshold
     return threshold_spec, j_max, sn_spec, sp_spec
+
+

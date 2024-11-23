@@ -1,14 +1,20 @@
+
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import KFold
+
+import torch
 
 from load import load_data, load_GSD
 from train import train_VGAE, train_eval_DSIPredictor
-from utils import save_logits_with_baseline, evaluate_logits_with_baseline, try_gpu, youden_index
-
+from utils import save_logits_with_baseline, evaluate_logits_with_baseline, try_gpu
+def print_memory_usage():
+    import os
+    import psutil
+    process = psutil.Process(os.getpid())
+    print(f"Memory usage: {process.memory_info().rss / 1024 ** 2:.2f} MB")
 
 def cross_val(vgae_dict, features_tensor, adj_norm, AC, X, Y, epochs, log = True):
-
+    from sklearn.model_selection import KFold
     random_idx = list(range(AC.shape[0]))
     np.random.seed(888)
     np.random.shuffle(random_idx)
@@ -42,7 +48,7 @@ def cross_val(vgae_dict, features_tensor, adj_norm, AC, X, Y, epochs, log = True
         all_Y_label.append(Y_val)
         all_Y_pred.append(Y_pred)
         all_AC_val.append(AC_val)
-
+    
     Y_val = np.concatenate(all_Y_label)
     Y_pred = np.concatenate(all_Y_pred)
     AC_val = np.concatenate(all_AC_val)
@@ -86,12 +92,13 @@ if __name__ == "__main__":
     Y_test = dataset_test[:, 2].astype(np.int64).reshape([-1, 1])
     X_all = np.concatenate([X_train, X_test])
     Y_all = np.concatenate([Y_train, Y_test])
-
+    print(uniprot,data_path)
     features, adj_norm, adj_label  = load_data(uniprot, data_path, is_CT = True)
+    print(3)
     features = features.to(device=try_gpu())
     adj_norm = adj_norm.to(device=try_gpu())
     adj_label = adj_label.to(device=try_gpu())
-
+    print(3)
     print("Train variational graph autoencoder")
     VGAE, _  = train_VGAE(features, adj_norm, adj_label, 100, 343)
     vgae_dict = VGAE.state_dict()

@@ -52,15 +52,16 @@ def main(args):
     features, adj_norm, adj_label = load_data(uniprot, data_path, is_CT=True)
 
     model = DSIPredictor(686, 1)
-    model_dict = torch.load(args.model_location + "DSIPredictor.pth")
-    model.load_state_dict(model_dict)
+    model_dict = torch.load(args.model_location + "new1.pth",weights_only=True)
+    model.load_state_dict(model_dict,strict=False)
 
     model.eval()
-    if torch.cuda.is_available() and args.nogpu:
-        model = model.to(device=try_gpu())
-        features = features.to(device=try_gpu())
-        adj_norm = adj_norm.to(device=try_gpu())
-        print("Transferred model and data to GPU")
+    mps_device = torch.device("mps")
+    
+    model = model.to(device=mps_device)
+    features = features.to(device=mps_device)
+    adj_norm = adj_norm.to(device=mps_device)
+    print("Transferred model and data to GPU")
 
     with torch.no_grad():
         pred = model(features, adj_norm, [dub_idx], [sub_idx])
